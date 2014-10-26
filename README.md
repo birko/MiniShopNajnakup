@@ -10,7 +10,8 @@ in project composer.json
 ``` json
     "require": {
     ...
-        "birko/minishop-najnakup": "@dev"
+        "birko/minishop-najnakup": "@dev",
+        "birko/najnakup": "@dev"
 ```
 
 register in AppKernel
