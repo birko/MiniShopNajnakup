@@ -1,0 +1,9 @@
+parameters:
+#    core_najnakup.example.class: Core\NajnakupBundle\Example
+
+services:
+    core_najnakup.checkout_end_listener:
+        class: 'Core\NajnakupBundle\EventListener\CheckoutEndEventListener'
+        tags:
+            - { name: kernel.event_listener, event: kernel.controller, method: onKernelController, priority:  1}
+        arguments: [ @service_container, @doctrine.orm.entity_manager ]

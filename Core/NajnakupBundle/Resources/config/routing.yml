@@ -1,0 +1,3 @@
+core_najnakup_export:
+    pattern:  /najnakup/export
+    defaults: { _controller: CoreNajnakupBundle:Najnakup:export }
