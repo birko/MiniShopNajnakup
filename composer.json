@@ -1,0 +1,20 @@
+{
+    "name": "birko/minishop-najnakup",
+    "type": "symfony-bundle",
+    "description": "Najnakup support for MiniShop Site",
+    "keywords": ["birko", "shop", "minishop", "symfony2", "najnakup"], 
+    "license": "MIT", 
+    "authors": [ 
+        { 
+            "name": "Ing. František Bereň", 
+            "email": "birko@live.com" 
+        } 
+    ],
+    "autoload": {
+        "psr-0": {
+            "Core": ""
+        }
+    },
+
+    "target-dir": ""
+}
