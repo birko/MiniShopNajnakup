@@ -3,7 +3,6 @@ namespace Core\NajnakupBundle\EventListener;
 
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Site\ShopBundle\Controller\ShopController;
-use Core\NajnakupBundle\Entity\Najnakup;
 
 class CheckoutEndEventListener
 {
@@ -41,7 +40,7 @@ class CheckoutEndEventListener
                         $em = $this->em;
                         $orderEntity = $em->getRepository('CoreShopBundle:Order')->find($order);
                         if (!empty($orderEntity)) {
-                            $overeno = new Najnakup($key);
+                            $overeno = new \Najnakup($key);
                             $overeno->setEmail($orderEntity->getInvoiceEmail());
                             $orderitems = $orderEntity->getItems();
                             foreach ($orderitems as $item) {

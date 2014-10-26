@@ -15,6 +15,9 @@
             "Core": ""
         }
     },
+    "require": {
+       "birko/najnakup": "dev-master"
+    },
 
     "target-dir": ""
 }
