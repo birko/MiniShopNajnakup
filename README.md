@@ -38,8 +38,8 @@ in config
 
 ``` yaml  
     core_najnakup:
-    prices:
-        - 'normal'
-    key: ~
+        prices:
+            - 'normal'
+        key: ~
 ```
 
