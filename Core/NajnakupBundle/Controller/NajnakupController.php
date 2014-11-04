@@ -132,7 +132,11 @@ class NajnakupController extends ShopController
             $item->appendChild($cat);
 
             $url = $document->createElement('PRODUCT_URL');
-            $url->appendChild($document->createTextNode($this->generateUrl('product_site', array('slug'=> $product->getSlug()), true)));
+            $routeParams = array('slug'=> $product->getSlug());
+            if ($request->get('_locale')) {
+                $routeParams['_locale'] = $request->get('_locale');
+            }
+            $url->appendChild($document->createTextNode($this->generateUrl('product_site', $routeParams, true)));
             $item->appendChild($url);
 
             $shop->appendChild($item);
