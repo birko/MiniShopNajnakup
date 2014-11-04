@@ -14,6 +14,10 @@ class NajnakupController extends ShopController
         $minishop  = $this->container->getParameter('minishop');
         $em = $this->getDoctrine()->getManager();
         $query = $em->getRepository("CoreProductBundle:Product")->findByCategoryQuery(null, false, true, true, false);
+        $query->setHint(
+            \Gedmo\Translatable\TranslatableListener::HINT_TRANSLATABLE_LOCALE,
+            $request->get('_locale') // take locale from session or request etc.
+        );
         $medias = $em->getRepository("CoreProductBundle:ProductMedia")->getProductsMediasArray();
         $stocks = $em->getRepository("CoreProductBundle:Stock")->getStocksArray();
         
