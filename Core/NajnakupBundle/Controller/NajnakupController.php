@@ -195,10 +195,6 @@ class NajnakupController extends ShopController
                         $param->appendChild($param_val);
                         $clone->appendChild($param);
                     }
-                    $itemgroup = $document->createElement('ITEMGROUP_ID');
-                    $icode = trim($product->getId());
-                    $itemgroup->appendChild($document->createTextNode($icode));
-                    $clone->appendChild($itemgroup);
                     $shop->appendChild($clone);
                 }
             } else {
