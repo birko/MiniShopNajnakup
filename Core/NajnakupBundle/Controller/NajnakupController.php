@@ -23,6 +23,9 @@ class NajnakupController extends ShopController
         
         $medias = $em->getRepository("CoreProductBundle:ProductMedia")->getProductsMediasArray();
         $stocks = $em->getRepository("CoreProductBundle:Stock")->getStocksArray();
+        $attributes = $em->getRepository("CoreProductBundle:Attribute")->getGroupedAttributesByProducts(array(), array(), $request->get('_locale'));
+        $options = $em->getRepository("CoreProductBundle:ProductOption")->getGroupedOptionsByProducts(array(), array(), $request->get('_locale'));
+        $shippings = $em->getRepository("CoreShopBundle:Shipping")->getShippingQueryBuilder(null, true)->getQuery()->getResult();
         
         $pricegroup_id = $request->get('pricegroup');
         $priceGroup = null;
@@ -107,6 +110,13 @@ class NajnakupController extends ShopController
                 $avb->appendChild($document->createTextNode($qdocument));
             }
             $item->appendChild($avb);
+            
+            if (!empty($shippings)) {
+                $ship = reset($shippings);
+                $sh = $document->createElement('shipping');
+                $sh->appendChild($document->createTextNode(number_format($ship->calculatePriceVAT($currency), 2)));
+                $item->appendChild($sh);
+            }
 
             $cat = $document->createElement('CATEGORY');
             $pom = "";
@@ -157,7 +167,48 @@ class NajnakupController extends ShopController
             $url->appendChild($document->createTextNode($this->generateUrl('product_site', $routeParams, true)));
             $item->appendChild($url);
 
-            $shop->appendChild($item);
+            if(isset($attributes[$product->getId()])) {
+                foreach($attributes[$product->getId()] as $aname => $values)
+                {
+                    $param = $document->createElement('PARAM');
+                    $param_name = $document->createElement('PARAM_NAME');
+                    $param_name->appendChild($document->createTextNode($aname));
+                    $param->appendChild($param_name);
+                    
+                    $param_val = $document->createElement('VAL');
+                    $avalues = array();
+                    foreach($values as $v) {
+                        $avalues[] = $v['value'];
+                    }
+                    $param_val->appendChild($document->createTextNode(implode(", ", $avalues)));
+                    $param->appendChild($param_val);
+                    $item->appendChild($param);
+                }
+            }
+            
+            if (isset($options[$product->getId()])) {
+                $combinations = $this->addCombination($options[$product->getId()]);
+                foreach($combinations as $comb) {
+                    $clone = $item->cloneNode(true);
+                    foreach ($comb as $cname => $cvalue) {
+                        $param = $document->createElement('PARAM');
+                        $param_name = $document->createElement('PARAM_NAME');
+                        $param_name->appendChild($document->createTextNode($cname));
+                        $param->appendChild($param_name);
+                        $param_val = $document->createElement('VAL');
+                        $param_val->appendChild($document->createTextNode($cvalue));
+                        $param->appendChild($param_val);
+                        $clone->appendChild($param);
+                    }
+                    $itemgroup = $document->createElement('ITEMGROUP_ID');
+                    $icode = trim($product->getId());
+                    $itemgroup->appendChild($document->createTextNode($icode));
+                    $clone->appendChild($itemgroup);
+                    $shop->appendChild($clone);
+                }
+            } else {
+                $shop->appendChild($item);
+            }
         }
 
         $response = new Response();
@@ -167,5 +218,26 @@ class NajnakupController extends ShopController
         $response->headers->set('Content-disposition', ' attachment;filename=najnakup.xml');
 
         return $response;
+    }
+    
+    private function addCombination($options)
+    {
+        $comb = array_shift($options);
+        $fisrt = reset($comb);
+        $option_name = $fisrt['name'];
+        $result = array();
+        foreach ($comb as $ovalues) {
+            $option_value = $ovalues['value'];
+            if(!empty($options)) {
+                $prev_result = $this->addCombination($options);
+                foreach($prev_result as $pom) {
+                    $result[] = array_merge(array($option_name => $option_value), $pom);
+                }
+            } else {
+                $result[] =  array($option_name => $option_value);
+            }
+        }
+        
+        return $result;
     }
 }
