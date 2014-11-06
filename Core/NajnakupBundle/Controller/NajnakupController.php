@@ -21,7 +21,7 @@ class NajnakupController extends ShopController
             );
         }
         
-        $medias = $em->getRepository("CoreProductBundle:ProductMedia")->getProductsMediasArray();
+        $medias = $em->getRepository("CoreProductBundle:ProductMedia")->getProductsMediasArray(null, array('image'));
         $stocks = $em->getRepository("CoreProductBundle:Stock")->getStocksArray();
         $attributes = $em->getRepository("CoreProductBundle:Attribute")->getGroupedAttributesByProducts(array(), array(), $request->get('_locale'));
         $options = $em->getRepository("CoreProductBundle:ProductOption")->getGroupedOptionsByProducts(array(), array(), $request->get('_locale'));
@@ -74,7 +74,7 @@ class NajnakupController extends ShopController
 
             if (isset($medias[$product->getId()])) {
                 $img = $document->createElement('IMAGE_URL');
-                $media = current($medias[$product->getId()]);
+                $media = reset($medias[$product->getId()]);
                 $img->appendChild($document->createTextNode($request->getScheme() . '://' . $request->getHttpHost() . '/'. $media->getWebPath('original')));
                 $item->appendChild($img);
             }
@@ -105,7 +105,7 @@ class NajnakupController extends ShopController
             $avb = $document->createElement('AVAILABILITY');
 
             if (isset($stocks[$product->getId()])) {
-                $stock = current($stocks[$product->getId()]);
+                $stock = reset($stocks[$product->getId()]);
                 $qdocument = ($stock->getAmount() > 0 || ($stock->getAvailability())) ? "skladom" : "";
                 $avb->appendChild($document->createTextNode($qdocument));
             }
