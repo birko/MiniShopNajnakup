@@ -39,7 +39,7 @@ class NajnakupController extends ShopController
             $currency = $em->getRepository('CorePriceBundle:Currency')->find($currency_id);
         }
         $currency = ($currency) ? $currency : $this->getCurrency();
-        $pricetypes = $this->container->getParameter('najnakup.prices');
+        $pricetypes = $this->container->hasParameter('najnakup.prices') ? $this->container->getParameter('najnakup.prices') : array('normal');
       
         $document = new \DOMDocument('1.0', 'utf-8');
         $document->formatOutput = true;
