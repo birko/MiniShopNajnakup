@@ -93,7 +93,7 @@ class NajnakupController extends ShopController
                 $pprice = $pprice->calculatePriceVAT($pricegroup, $currency);
                 break;
             }
-            $price->appendChild($document->createTextNode(number_format($pprice, 2)));
+            $price->appendChild($document->createTextNode(number_format($pprice, 2, '.', '')));
             $item->appendChild($price);
 
             $manuf = $document->createElement('MANUFACTURER');
@@ -114,7 +114,7 @@ class NajnakupController extends ShopController
             if (!empty($shippings)) {
                 $ship = reset($shippings);
                 $sh = $document->createElement('shipping');
-                $sh->appendChild($document->createTextNode(number_format($ship->calculatePriceVAT($currency), 2)));
+                $sh->appendChild($document->createTextNode(number_format($ship->calculatePriceVAT($currency), 2, '.', '')));
                 $item->appendChild($sh);
             }
 
