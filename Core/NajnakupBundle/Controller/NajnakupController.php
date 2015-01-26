@@ -13,7 +13,7 @@ class NajnakupController extends ShopController
         $request = $this->getRequest();
         $minishop  = $this->container->getParameter('minishop');
         $em = $this->getDoctrine()->getManager();
-        $query = $em->getRepository("CoreProductBundle:Product")->findByCategoryQuery(null, false, true, true, false);
+        $query = $em->getRepository("CoreProductBundle:Product")->findByCategoryQuery(null, false, true, false, false);
         if ($request->get('_locale')) {
             $query->setHint(
                 \Gedmo\Translatable\TranslatableListener::HINT_TRANSLATABLE_LOCALE,
@@ -23,10 +23,12 @@ class NajnakupController extends ShopController
         
         $medias = $em->getRepository("CoreProductBundle:ProductMedia")->getProductsMediasArray(null, array('image'));
         $stocks = $em->getRepository("CoreProductBundle:Stock")->getStocksArray();
+        $prices = $em->getRepository("CoreProductBundle:Price")->getPricesArray();
+        $categories = $em->getRepository("CoreProductBundle:ProductCategory")->getCategoriesArray();
         $attributes = $em->getRepository("CoreProductBundle:Attribute")->getGroupedAttributesByProducts(array(), array(), $request->get('_locale'));
         $options = $em->getRepository("CoreProductBundle:ProductOption")->getGroupedOptionsByProducts(array(), array(), $request->get('_locale'));
         $shippings = $em->getRepository("CoreShopBundle:Shipping")->getShippingQueryBuilder(null, true)->getQuery()->getResult();
-        
+      
         $pricegroup_id = $request->get('pricegroup');
         $priceGroup = null;
         if ($pricegroup_id !== null) {
@@ -81,17 +83,14 @@ class NajnakupController extends ShopController
 
             $price = $document->createElement('PRICE');
             $pprice = 0;
-            foreach($pricetypes as $type) {
-                $priceEntity = $product->getMinimalPrice($currency, $priceGroup, $type);
-                if ($priceEntity) {
-                    $pprice = $priceEntity->getPriceVat();
-                    break;
-                }
-            }
             if (isset($prices[$product->getId()])) {
-                $pprice = PriceRepository::getProductPrice($prices[$product->getId()], $types);
-                $pprice = $pprice->calculatePriceVAT($pricegroup, $currency);
-                break;
+                foreach($pricetypes as $type) {
+                    $priceEntity = $prices[$product->getId()]->getMinimalPrice($currency, $priceGroup, $type);
+                    if ($priceEntity) {
+                        $pprice = $priceEntity->getPriceVat();
+                        break;
+                    }
+                }
             }
             $price->appendChild($document->createTextNode(number_format($pprice, 2, '.', '')));
             $item->appendChild($price);
@@ -120,8 +119,8 @@ class NajnakupController extends ShopController
 
             $cat = $document->createElement('CATEGORY');
             $pom = "";
-            if ($product->getProductCategories()->count() > 0) {
-                $category  = $product->getProductCategories()->first()->getCategory();
+            if (isset($categories[$product->getId()]) && $categories[$product->getId()]->getProductCategories()->count() > 0) {
+                $category  = $categories[$product->getId()]->getProductCategories()->first()->getCategory();
                 $category_id = $category->getId();
                 if (isset($paths[$category_id])) {
                     $pom = $paths[$category_id];
