@@ -27,6 +27,7 @@ class NajnakupController extends ShopController
         $categories = $em->getRepository("CoreProductBundle:ProductCategory")->getCategoriesArray(null, $request->get('_locale'));
         $attributes = $em->getRepository("CoreProductBundle:Attribute")->getGroupedAttributesByProducts(array(), array(), $request->get('_locale'));
         $options = $em->getRepository("CoreProductBundle:ProductOption")->getGroupedOptionsByProducts(array(), array(), $request->get('_locale'));
+        $variations = $em->getRepository("CoreProductBundle:ProductVariation")->getGroupedVariationsByProducts(array(), $request->get('_locale'));
         $shippings = $em->getRepository("CoreShopBundle:Shipping")->getShippingQueryBuilder(null, true)->getQuery()->getResult();
       
         $pricegroup_id = $request->get('pricegroup');
@@ -167,15 +168,40 @@ class NajnakupController extends ShopController
             $item->appendChild($url);
 
             $parameters = array();
-            foreach(array($attributes, $options) as $parameterArray)
-            {
-                if(isset($parameterArray[$product->getId()])) {
-                    foreach($parameterArray[$product->getId()] as $aname => $avalues) {
-                        foreach($avalues as $av) {
-                            $parameters[$aname][$av['value']] = array(
-                                'name' => $aname,
-                                'value' => $av['value'],
+            if (isset($variations[$product->getId()])) {
+                foreach ($variations[$product->getId()] as $key => $variation) {
+                    $parameters[$variations] = array();
+                    foreach ($variation as $attribute_name => $value) {
+                        $parameters[$variations][$attribute_name][$value['value']] = array(
+                                'name' => $attribute_name,
+                                'value' => $value['value'],
                             );
+                    }
+                    $keys = array_keys($variation);
+                    if (isset($attributes[$product->getId()])) {
+                        foreach ($attributes[$product->getId()] as $attribute_name => $values) {
+                            if (!in_array($attribute_name, $keys)) {
+                                foreach ($values as $av) {
+                                    $parameters[$variations][$attribute_name][$av['value']] = array(
+                                        'name' => $attribute_name,
+                                        'value' => $av['value'],
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                foreach(array($attributes, $options) as $parameterArray)
+                {
+                    if(isset($parameterArray[$product->getId()])) {
+                        foreach($parameterArray[$product->getId()] as $aname => $avalues) {
+                            foreach($avalues as $av) {
+                                $parameters[$aname][$av['value']] = array(
+                                    'name' => $aname,
+                                    'value' => $av['value'],
+                                );
+                            }
                         }
                     }
                 }
